@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>GPS坐标（WGS-84） 换算 火星坐标（GCJ-02）</title>
+
+</head>
+<body>
+
+<h2>GPS坐标（WGS-84） 换算 火星坐标（GCJ-02）</h2>
+
+<br>
+<p>GPS坐标（WGS-84） Lat: <input type="text" id="WGSLat" /> &emsp; Lon: <input type="text" id="WGSLon" /> &emsp; <button type="button" onclick="tomars ()">转换</button> &emsp; 
+    火星坐标（GCJ-02） Lat: <input type="text" id="GCJLat" /> &emsp; Lon: <input type="text" id="GCJLon" /></p>
+
+<p><button type="button" onclick="gpxsto ()">转换GPX内容</button></p>
+<p><textarea rows="30" cols="70" id="WGSgpx"></textarea> &emsp;  &emsp; <textarea rows="30" cols="70" id="GCJgpx"></textarea></p>
+
+<p><span id="demo"></span></p>
+<p><span id="demo1"></span></p>
+<script>
+    Pi = 3.14159265358979;
+    a = 6378245;
+    ee = 6.69342162296594E-03;
+
+function tomars(){
+    var LatLon = new Array();
+    LatLon[0]=Number(document.getElementById("WGSLat").value);
+    LatLon[1]=Number(document.getElementById("WGSLon").value);
+    LatLon=wgs2gcj(LatLon[0],LatLon[1]);
+    document.getElementById("GCJLat").value=LatLon[0];
+    document.getElementById("GCJLon").value=LatLon[1];
+}
+
+function gpxsto (){
+    var wgsgpxstr,gcjgpxstr;
+    var LatLon = new Array();
+    wgsgpxstr = document.getElementById("WGSgpx").value;
+    gcjgpxstr = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" + "\n" + "<gpx>" + "\n" + "	<trk>" + "\n";
+    parser=new DOMParser();
+    xmlDoc=parser.parseFromString(wgsgpxstr,"text/xml");
+    gcjgpxstr=gcjgpxstr + "		<name>" + xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue + "</name>" + "\n";
+    gcjgpxstr=gcjgpxstr + "		<trkseg>" + "\n";
+            document.getElementById("demo1").innerHTML = xmlDoc.getElementsByTagName("trkpt").length;
+    for (var i=0;i<xmlDoc.getElementsByTagName("trkpt").length;i++){
+        document.getElementById("demo").innerHTML = i.toString();
+        LatLon[0]= Number(xmlDoc.getElementsByTagName("trkpt")[i].getAttribute("lat"));
+        LatLon[1]= Number(xmlDoc.getElementsByTagName("trkpt")[i].getAttribute("lon"));
+        LatLon=wgs2gcj(LatLon[0],LatLon[1]);
+        gcjgpxstr=gcjgpxstr + "			<trkpt lat=\"" + LatLon[0] + "\" lon=\"" + LatLon[1] + "\">" + "\n";
+        gcjgpxstr=gcjgpxstr + "				<ele>" + xmlDoc.getElementsByTagName("ele")[i].childNodes[0].nodeValue + "</ele>" + "\n";
+        gcjgpxstr=gcjgpxstr + "				<time>" + xmlDoc.getElementsByTagName("time")[i].childNodes[0].nodeValue + "</time>" + "\n";
+        gcjgpxstr=gcjgpxstr + "			</trkpt>" + "\n"
+    }
+    //document.getElementById("demo").innerHTML = xmlDoc.getElementsByTagName("trkpt")[0].getAttribute("lat");
+    //document.getElementById("demo").innerHTML = xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue;
+    document.getElementById("demo").innerHTML = xmlDoc.getElementsByTagName("trkpt").length;
+    gcjgpxstr=gcjgpxstr + "		</trkseg>" + "\n" + "	</trk>" + "\n" + "</gpx>";
+    document.getElementById("GCJgpx").value=gcjgpxstr;
+}
+
+function wgs2gcj(wgLat, wgLon){
+    var  dLat, dLon, mgLat, mgLon, radLat, magic, sqrMagic;
+    dLat = transformLat(wgLon-105, wgLat-35);
+    dLon = transformLon(wgLon-105, wgLat-35);
+    radLat = wgLat / 180 * Pi;
+    magic = Math.sin(radLat);
+    magic = 1-ee * magic * magic;
+    sqrMagic = Math.sqrt(magic);
+    dLat = (dLat * 180) / ((a * (1-ee)) / (magic * sqrMagic) * Pi);
+    dLon = (dLon * 180) / (a / sqrMagic * Math.cos(radLat) * Pi);
+    mgLat = wgLat + dLat;
+    mgLon = wgLon + dLon;
+    return[mgLat.toFixed(5),mgLon.toFixed(5)];
+}
+
+function transformLat(x , y) {
+    var ret;
+    ret = -100 + 2 * x + 3 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+    ret = ret + ((20 * Math.sin(6 * x * Pi) + 20 * Math.sin(2 * x * Pi)) * 2 / 3);
+    ret = ret + ((20 * Math.sin(y * Pi) + 40 * Math.sin(y / 3 * Pi)) * 2 / 3);
+    ret = ret + ((160 * Math.sin(y / 12 * Pi) + 320 * Math.sin(y * Pi / 30)) * 2 / 3);
+    return ret;
+}
+
+function transformLon(x , y) {
+    var ret;
+    ret = 300 + x + 2 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+    ret = ret + ((20 * Math.sin(6 * x * Pi) + 20 * Math.sin(2 * x * Pi)) * 2 / 3);
+    ret = ret + ((20 * Math.sin(x * Pi) + 40 * Math.sin(x / 3 * Pi)) * 2 / 3);
+    ret = ret + ((150 * Math.sin(x / 12 * Pi) + 300 * Math.sin(x / 30 * Pi)) * 2 / 3);
+    return ret;
+}
+
+</script>
+
+</body>
+</html>
