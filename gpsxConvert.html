@@ -40,20 +40,24 @@ function gpxsto (){
     xmlDoc=parser.parseFromString(wgsgpxstr,"text/xml");
     gcjgpxstr=gcjgpxstr + "		<name>" + xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue + "</name>" + "\n";
     gcjgpxstr=gcjgpxstr + "		<trkseg>" + "\n";
-            document.getElementById("demo1").innerHTML = xmlDoc.getElementsByTagName("trkpt").length;
-    for (var i=0;i<xmlDoc.getElementsByTagName("trkpt").length;i++){
-        document.getElementById("demo").innerHTML = i.toString();
-        LatLon[0]= Number(xmlDoc.getElementsByTagName("trkpt")[i].getAttribute("lat"));
-        LatLon[1]= Number(xmlDoc.getElementsByTagName("trkpt")[i].getAttribute("lon"));
+    var trkptall=xmlDoc.getElementsByTagName("trkpt");
+    document.getElementById("demo").innerHTML="总共" + trkptall.length + "个节点"
+    for (var i=0;i<trkptall.length;i++){
+        LatLon[0]= Number(trkptall[i].getAttribute("lat"));
+        LatLon[1]= Number(trkptall[i].getAttribute("lon"));
         LatLon=wgs2gcj(LatLon[0],LatLon[1]);
         gcjgpxstr=gcjgpxstr + "			<trkpt lat=\"" + LatLon[0] + "\" lon=\"" + LatLon[1] + "\">" + "\n";
-        gcjgpxstr=gcjgpxstr + "				<ele>" + xmlDoc.getElementsByTagName("ele")[i].childNodes[0].nodeValue + "</ele>" + "\n";
-        gcjgpxstr=gcjgpxstr + "				<time>" + xmlDoc.getElementsByTagName("time")[i].childNodes[0].nodeValue + "</time>" + "\n";
+        gcjgpxstr=gcjgpxstr + "				<ele>" + trkptall[i].getElementsByTagName("ele")[0].childNodes[0].nodeValue + "</ele>" + "\n";
+        if(trkptall[i].getElementsByTagName("speed")[0]!=undefined){
+            gcjgpxstr=gcjgpxstr + "				<speed>" + trkptall[i].getElementsByTagName("speed")[0].childNodes[0].nodeValue + "</speed>" + "\n";
+        }
+        if(trkptall[i].getElementsByTagName("course")[0]!=undefined){
+            gcjgpxstr=gcjgpxstr + "				<course>" + trkptall[i].getElementsByTagName("course")[0].childNodes[0].nodeValue + "</course>" + "\n";
+        }
+        gcjgpxstr=gcjgpxstr + "				<time>" + trkptall[i].getElementsByTagName("time")[0].childNodes[0].nodeValue + "</time>" + "\n";
         gcjgpxstr=gcjgpxstr + "			</trkpt>" + "\n"
+        document.getElementById("demo1").innerHTML="已处理" + i + "+1个节点"
     }
-    //document.getElementById("demo").innerHTML = xmlDoc.getElementsByTagName("trkpt")[0].getAttribute("lat");
-    //document.getElementById("demo").innerHTML = xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue;
-    document.getElementById("demo").innerHTML = xmlDoc.getElementsByTagName("trkpt").length;
     gcjgpxstr=gcjgpxstr + "		</trkseg>" + "\n" + "	</trk>" + "\n" + "</gpx>";
     document.getElementById("GCJgpx").value=gcjgpxstr;
 }
