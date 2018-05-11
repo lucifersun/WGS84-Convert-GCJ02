@@ -9,10 +9,11 @@
 <h2>GPS坐标（WGS-84） 换算 火星坐标（GCJ-02）</h2>
 
 <br>
-<p>GPS坐标（WGS-84） Lat: <input type="text" id="WGSLat" /> &emsp; Lon: <input type="text" id="WGSLon" /> &emsp; <button type="button" onclick="tomars ()">转换</button> &emsp; 
+<p>GPS坐标（WGS-84） Lat: <input type="text" id="WGSLat" /> &emsp; Lon: <input type="text" id="WGSLon" /> &emsp; <button type="button" onclick="tomars ()">转换==></button> &emsp; 
     火星坐标（GCJ-02） Lat: <input type="text" id="GCJLat" /> &emsp; Lon: <input type="text" id="GCJLon" /></p>
 
-<p><button type="button" onclick="gpxsto ()">转换GPX内容</button></p>
+<p><button type="button" onclick="gpxsto ()">转换GPX内容</button> &emsp; <input type="checkbox" onclick="gettime()" id="Clip"/> 截取部分 &emsp; 开始时间: <input type="datetime-local" id="begin_user_time" />  
+    &emsp; 结束时间: <input type="datetime-local" id="end_user_time" /> &emsp; 时区: <input type="text" size="1" id="GMT" value="8"/> &emsp; <button type="button" onclick="gettime ()">刷新时间</button></p>
 <p><textarea rows="30" cols="70" id="WGSgpx"></textarea> &emsp;  &emsp; <textarea rows="30" cols="70" id="GCJgpx"></textarea></p>
 
 <p><span id="demo"></span></p>
@@ -30,6 +31,19 @@ function tomars(){
     document.getElementById("GCJLat").value=LatLon[0];
     document.getElementById("GCJLon").value=LatLon[1];
 }
+function gettime(){
+    var wgsgpxstr;
+    wgsgpxstr = document.getElementById("WGSgpx").value;
+    parser=new DOMParser();
+    xmlDoc=parser.parseFromString(wgsgpxstr,"text/xml");
+    var trkptall=xmlDoc.getElementsByTagName("trkpt");
+    var beginTime,endTime;
+    beginTime=Date.parse(trkptall[0].getElementsByTagName("time")[0].childNodes[0].nodeValue) + document.getElementById("GMT").value*3600*1000;
+    endTime=Date.parse(trkptall[trkptall.length-1].getElementsByTagName("time")[0].childNodes[0].nodeValue) + document.getElementById("GMT").value*3600*1000;
+    //document.getElementById("demo").innerHTML=beginTime;
+    document.getElementById("begin_user_time").value=new Date (beginTime).toISOString().substr(0,16);
+    document.getElementById("end_user_time").value=new Date (endTime).toISOString().substr(0,16);
+}
 
 function gpxsto (){
     var wgsgpxstr,gcjgpxstr;
@@ -42,7 +56,21 @@ function gpxsto (){
     gcjgpxstr=gcjgpxstr + "		<trkseg>" + "\n";
     var trkptall=xmlDoc.getElementsByTagName("trkpt");
     document.getElementById("demo").innerHTML="总共" + trkptall.length + "个节点"
+    var beginTime,endTime,nowTime;
+    beginTime=Date.parse(document.getElementById("begin_user_time").value + ":00Z") - document.getElementById("GMT").value*3600*1000;
+    endTime=Date.parse(document.getElementById("end_user_time").value + ":59Z") -  document.getElementById("GMT").value*3600*1000;
+    var clipValue
+    clipValue=document.getElementById("Clip").checked;
+    var ii;
+    ii=1;
     for (var i=0;i<trkptall.length;i++){
+        nowTime=Date.parse(trkptall[i].getElementsByTagName("time")[0].childNodes[0].nodeValue);
+        if (nowTime < beginTime && clipValue){
+            continue;
+        }
+        if (nowTime>endTime && clipValue){
+            break;
+        }
         LatLon[0]= Number(trkptall[i].getAttribute("lat"));
         LatLon[1]= Number(trkptall[i].getAttribute("lon"));
         LatLon=wgs2gcj(LatLon[0],LatLon[1]);
@@ -56,7 +84,8 @@ function gpxsto (){
         }
         gcjgpxstr=gcjgpxstr + "				<time>" + trkptall[i].getElementsByTagName("time")[0].childNodes[0].nodeValue + "</time>" + "\n";
         gcjgpxstr=gcjgpxstr + "			</trkpt>" + "\n"
-        document.getElementById("demo1").innerHTML="已处理" + i + "+1个节点"
+        document.getElementById("demo1").innerHTML="已处理" + ii + "个节点"
+        ii++;
     }
     gcjgpxstr=gcjgpxstr + "		</trkseg>" + "\n" + "	</trk>" + "\n" + "</gpx>";
     document.getElementById("GCJgpx").value=gcjgpxstr;
