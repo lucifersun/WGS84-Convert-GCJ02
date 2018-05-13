@@ -14,7 +14,7 @@
 
 <p><button type="button" onclick="gpxsto ()">转换GPX内容</button> &emsp; <input type="checkbox" onclick="gettime()" id="Clip"/> 截取部分 &emsp; 开始时间: <input type="datetime-local" id="begin_user_time" />  
     &emsp; 结束时间: <input type="datetime-local" id="end_user_time" /> &emsp; 时区: <input type="text" size="1" id="GMT" value="8"/> &emsp; <button type="button" onclick="gettime ()">刷新时间</button></p>
-<p>注:截取功能仅支持截取中间段内容（截头去尾）。GPX使用UTC时间，时区设置仅作用于起讫时间的显示，方便调整，不会调整GPX内的时间数据。firefox不支持datetime-local对象。</p>
+<p>注:截取功能仅支持截取中间段内容（截头去尾）。GPX使用UTC时间，时区设置仅作用于起讫时间的显示，方便调整，不会影响GPX内的时间数据。firefox不支持datetime-local对象。</p>
 <p><textarea rows="30" cols="70" id="WGSgpx"></textarea> &emsp;  &emsp; <textarea rows="30" cols="70" id="GCJgpx"></textarea></p>
 
 <p><span id="demo"></span></p>
