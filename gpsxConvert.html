@@ -9,13 +9,24 @@
 <h2>GPS坐标（WGS-84） 换算 火星坐标（GCJ-02）</h2>
 
 <br>
-<p>GPS坐标（WGS-84） Lat: <input type="text" id="WGSLat" /> &emsp; Lon: <input type="text" id="WGSLon" /> &emsp; <button type="button" onclick="tomars ()">转换==></button> &emsp; 
+<p>GPS坐标（WGS-84） Lat: <input type="text" id="WGSLat" /> &emsp; Lon: <input type="text" id="WGSLon" /> &emsp; <button type="button" onclick="tomars ()">转换==></button> &emsp;
     火星坐标（GCJ-02） Lat: <input type="text" id="GCJLat" /> &emsp; Lon: <input type="text" id="GCJLon" /></p>
 
-<p><button type="button" onclick="gpxsto ()">转换GPX内容</button> &emsp; <input type="checkbox" onclick="gettime()" id="Clip"/> 截取部分 &emsp; 开始时间: <input type="datetime-local" id="begin_user_time" />  
+<p><button type="button" onclick="gpxsto ()">转换GPX内容</button> &emsp; <input type="checkbox" onclick="gettime()" id="Clip"/> 截取部分 &emsp; 开始时间: <input type="datetime-local" id="begin_user_time" />
     &emsp; 结束时间: <input type="datetime-local" id="end_user_time" /> &emsp; 时区: <input type="text" size="1" id="GMT" value="8"/> &emsp; <button type="button" onclick="gettime ()">刷新时间</button></p>
 <p>注:截取功能仅支持截取中间段内容（截头去尾）。GPX使用UTC时间，时区设置仅作用于起讫时间的显示，方便调整，不会影响GPX内的时间数据。firefox不支持datetime-local对象。</p>
-<p><textarea rows="30" cols="70" id="WGSgpx"></textarea> &emsp;  &emsp; <textarea rows="30" cols="70" id="GCJgpx"></textarea></p>
+<table>
+    <tr>
+        <td>选取WGS-GPX文件 &emsp; <input id="WGSfile" type="file" accept=".gpx" onchange="readFiles(this.files)"></td>
+        <td>&emsp;  &emsp;</td>
+        <td>保存GCJ-GPX文件 &emsp; <button type="button" id="down" onclick="saveFile()">保存文件</button></td>
+    </tr>
+    <tr>
+        <td><textarea rows="30" cols="70" id="WGSgpx"></textarea></td>
+        <td>&emsp;  &emsp;</td>
+        <td><textarea rows="30" cols="70" id="GCJgpx"></textarea></td>
+    </tr>
+</table>
 
 <p><span id="demo"></span></p>
 <p><span id="demo1"></span></p>
@@ -23,6 +34,36 @@
     Pi = 3.14159265358979;
     a = 6378245;
     ee = 6.69342162296594E-03;
+
+function readFiles(files) {
+    var file = files[0];
+
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        document.getElementById("WGSgpx").value=e.target.result;
+    };
+    reader.readAsText(file);
+}
+
+function saveFile(filename, content) {
+    var filename = "GCJ-GPX.gpx";
+    var content = document.getElementById("GCJgpx").value;
+    var blob = new Blob([content], {type: 'text/plain'});
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+
+    a.style = "display: none";
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function () {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 5);
+}
+
 
 function tomars(){
     var LatLon = new Array();
@@ -91,6 +132,7 @@ function gpxsto (){
     }
     gcjgpxstr=gcjgpxstr + "		</trkseg>" + "\n" + "	</trk>" + "\n" + "</gpx>";
     document.getElementById("GCJgpx").value=gcjgpxstr;
+    gettime();
 }
 
 function wgs2gcj(wgLat, wgLon){
