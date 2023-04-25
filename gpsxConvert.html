@@ -17,9 +17,9 @@
 <p>注:截取功能仅支持截取中间段内容（截头去尾）。GPX使用UTC时间，时区设置仅作用于起讫时间的显示，方便调整，不会影响GPX内的时间数据。firefox不支持datetime-local对象。</p>
 <table>
     <tr>
-        <td>选取WGS-GPX文件 &emsp; <input id="WGSfile" type="file" accept=".gpx" onchange="readFiles(this.files)"></td>
+        <td>WGS-GPX文件 &emsp; <input id="WGSfile" type="file" accept=".gpx" onchange="readFiles(this.files)"></td>
         <td>&emsp;  &emsp;</td>
-        <td>保存GCJ-GPX文件 &emsp; <button type="button" id="down" onclick="saveFile()">保存文件</button></td>
+        <td>GCJ-GPX文件 &emsp; <button type="button" id="down" onclick="saveFile()">保存文件</button></td>
     </tr>
     <tr>
         <td><textarea rows="30" cols="70" id="WGSgpx"></textarea></td>
