@@ -95,7 +95,6 @@ function gpxsto (){
     gcjgpxstr = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" + "\n" + "<gpx>" + "\n" + "	<trk>" + "\n";
     parser=new DOMParser();
     xmlDoc=parser.parseFromString(wgsgpxstr,"text/xml");
-    gcjgpxstr=gcjgpxstr + "		<name>" + xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue + "</name>" + "\n";
     gcjgpxstr=gcjgpxstr + "		<trkseg>" + "\n";
     var trkptall=xmlDoc.getElementsByTagName("trkpt");
     document.getElementById("demo").innerHTML="总共" + trkptall.length + "个节点"
